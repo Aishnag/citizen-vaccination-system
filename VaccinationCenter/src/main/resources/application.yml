@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: Vaccination-Center
+  datasource:
+    url: jdbc:mysql://localhost:3308/vaccinationCenterDB
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+# Feign client timeouts & logging (helpful in prod)
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 3000
+        loggerLevel: full
+
+# Resilience4j
+resilience4j:
+  circuitbreaker:
+    instances:
+      citizenService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+  retry:
+    instances:
+      citizenService:
+        max-attempts: 3
+        waitDuration: 200ms
+
+# (Optional) expose actuator to check circuit status
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,resilience4j*
